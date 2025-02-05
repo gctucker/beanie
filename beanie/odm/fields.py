@@ -148,32 +148,29 @@ class PydanticObjectId(ObjectId):
         def __get_pydantic_core_schema__(
             cls, source_type: Type[Any], handler: GetCoreSchemaHandler
         ) -> CoreSchema:
+            object_id_schema = str_schema(
+                pattern="^[0-9a-f]{24}$",
+                min_length=24,
+                max_length=24,
+            )
             if not IS_PYDANTIC_V2_10:
                 return no_info_plain_validator_function(
                     cls._validate,
                     metadata={
-                        "pydantic_js_input_core_schema": str_schema(
-                            pattern="^[0-9a-f]{24}$",
-                            min_length=24,
-                            max_length=24,
-                        )
+                        "pydantic_js_input_core_schema": object_id_schema,
                     },
                     serialization=plain_serializer_function_ser_schema(
                         lambda instance: str(instance),
-                        return_schema=str_schema(),
+                        return_schema=object_id_schema,
                         when_used="json",
                     ),
                 )
             return no_info_plain_validator_function(
                 cls._validate,
-                json_schema_input_schema=str_schema(
-                    pattern="^[0-9a-f]{24}$",
-                    min_length=24,
-                    max_length=24,
-                ),
+                json_schema_input_schema=object_id_schema,
                 serialization=plain_serializer_function_ser_schema(
                     lambda instance: str(instance),
-                    return_schema=str_schema(),
+                    return_schema=object_id_schema,
                     when_used="json",
                 ),
             )
